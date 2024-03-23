@@ -11,3 +11,5 @@ SESSION_DB_URL="etcd://localhost:2379"
 # OR
 SESSION_DB_URL="redis://:password@localhost:6379"
 ```
+
+## This was created by Kalytero LLC
