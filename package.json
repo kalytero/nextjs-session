@@ -1,0 +1,30 @@
+{
+  "name": "nextjs-session",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "keywords": ["nextjs", "session"],
+  "author": "yus-sato <yus-sato@kalyte.ro> (https://kalyte.ro)",
+  "license": "MIT",
+  "dependencies": {
+    "@keyv/etcd": "^1.2.1",
+    "@keyv/redis": "^2.8.4",
+    "dotenv": "^16.4.5",
+    "http": "^0.0.1-security",
+    "keyv": "^4.5.4",
+    "next": "^14.1.4",
+    "react-dom": "^18.2.0",
+    "recat": "^0.0.0",
+    "typescript": "^5.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.69",
+    "@types/react-dom": "^18.2.22"
+  }
+}
