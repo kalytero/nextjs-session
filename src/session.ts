@@ -65,7 +65,7 @@ export class Session {
     const sessionId = crypto.randomUUID();
     const value = await Session.keyv.get(preSessionId);
     this.setId(sessionId);
-    Session.keyv.set(sessionId, value ? value : {});
+    Session.keyv.set(sessionId, value ? value : {}, 7 * 24 * 60 * 60 * 1000);
     Session.keyv.delete(preSessionId);
   }
 
