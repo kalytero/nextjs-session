@@ -73,7 +73,7 @@ export class Session {
     const preSessionId = await this.getId();
     const sessionId = crypto.randomUUID();
     this.setId(sessionId);
-    Session.keyv.set(sessionId, {});
+    Session.keyv.set(sessionId, {}, 7 * 24 * 60 * 60);
     Session.keyv.delete(preSessionId);
   }
 
@@ -88,6 +88,6 @@ export class Session {
     const sessionId = await this.getId();
     let obj = await Session.keyv.get(sessionId);
     obj = Object.assign(obj ? obj : {}, { [key]: value });
-    return await Session.keyv.set(sessionId, obj);
+    return await Session.keyv.set(sessionId, obj, 7 * 24 * 60 * 60);
   }
 }
