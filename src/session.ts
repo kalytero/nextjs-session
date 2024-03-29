@@ -6,7 +6,7 @@
 /*   By: yus-sato <yushin-sato@kalytero.ne.jp>       +#++:++    +#++:++#++: +#+       +#++:       +#+     +#++:++#      */
 /*                                                  +#+  +#+   +#+     +#+ +#+        +#+        +#+     +#+            */
 /*   Created: 2024/03/23 01:46:26 by yus-sato      #+#   #+#  #+#     #+# #+#        #+#        #+#     #+#             */
-/*   Updated: 2024/03/23 01:50:21 by yus-sato     ###    ### ###     ### ########## ###        ###     ##########.ro    */
+/*   Updated: 2024/03/29 23:54:28 by yus-sato     ###    ### ###     ### ########## ###        ###     ##########.ro    */
 /*                                                                                                                      */
 /* ******************************************************************************************************************** */
 
@@ -34,8 +34,7 @@ function keyvStoreResolver(
 
 export class Session {
   /* prettier-ignore */ private static readonly DB_URL = process.env.SESSION_DB_URL;
-  /* prettier-ignore */ private keyv = new Keyv<KeyValue>({ store: keyvStoreResolver(this.DB_URL)});
-  /* prettier-ignore */ private req: IncomingMessage & { cookies: Partial<{ [key: string]: string }> };
+  /* prettier-ignore */ private static keyv = new Keyv<KeyValue>({ store: keyvStoreResolver(Session.DB_URL)});
   /* prettier-ignore */ private res: ServerResponse<IncomingMessage>;
   /* prettier-ignore */ private sessid: string;
 
@@ -43,7 +42,6 @@ export class Session {
     req: IncomingMessage & { cookies: Partial<{ [key: string]: string }> },
     res: ServerResponse<IncomingMessage>
   ) {
-    this.req = req;
     this.res = res;
     this.sessid = req.cookies["sessid"] ? req.cookies["sessid"] : "";
   }
@@ -54,27 +52,26 @@ export class Session {
   }
 
   public async getId(): Promise<SessionId> {
-    const sessId = this.sessid ? this.sessid : crypto.randomUUID();
-    if (!this.req.cookies["sessid"]) this.setId(sessId);
-    this.sessid = sessId;
-    return sessId;
+    if (!this.sessid) this.sessid = crypto.randomUUID();
+    return this.sessid;
   }
 
   public async regenerateId() {
-    const preSessionId = await this.getId();
-    const sessionId = crypto.randomUUID();
-    const value = await Session.keyv.get(preSessionId);
-    this.setId(sessionId);
-    Session.keyv.set(sessionId, value ? value : {}, 7 * 24 * 60 * 60 * 1000);
-    Session.keyv.delete(preSessionId);
+    const value = await Session.keyv.get(this.sessid);
+    Session.keyv.delete(this.sessid);
+    this.sessid = crypto.randomUUID();
+    this.setId(this.sessid);
+    Session.keyv.set(this.sessid, value ? value : {}, 7 * 24 * 60 * 60 * 1000);
+    return this.sessid;
   }
 
   public async destroy() {
-    const preSessionId = await this.getId();
-    const sessionId = crypto.randomUUID();
-    this.setId(sessionId);
-    Session.keyv.set(sessionId, {}, 7 * 24 * 60 * 60);
-    Session.keyv.delete(preSessionId);
+    if (this.sessid) {
+      Session.keyv.delete(this.sessid);
+      this.sessid = "";
+    }
+    this.sessid = crypto.randomUUID();
+    this.setId(this.sessid);
   }
 
   public async get(key: string = "") {
