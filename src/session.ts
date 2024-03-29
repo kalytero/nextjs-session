@@ -34,7 +34,7 @@ function keyvStoreResolver(
 
 export class Session {
   /* prettier-ignore */ private static readonly DB_URL = process.env.SESSION_DB_URL;
-  /* prettier-ignore */ private static readonly keyv = new Keyv<KeyValue>({ store: keyvStoreResolver(this.DB_URL)});
+  /* prettier-ignore */ private keyv = new Keyv<KeyValue>({ store: keyvStoreResolver(this.DB_URL)});
   /* prettier-ignore */ private req: IncomingMessage & { cookies: Partial<{ [key: string]: string }> };
   /* prettier-ignore */ private res: ServerResponse<IncomingMessage>;
   /* prettier-ignore */ private sessid: string;
