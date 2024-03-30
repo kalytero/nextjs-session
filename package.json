@@ -5,8 +5,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "prepare": "npm run build"
   },
   "keywords": ["nextjs", "session"],
   "author": "yus-sato <yus-sato@kalyte.ro> (https://kalyte.ro)",
