@@ -7,7 +7,7 @@
 /*   By: yus-sato <yushin-sato@kalytero.ne.jp>       +#++:++    +#++:++#++: +#+       +#++:       +#+     +#++:++#      */
 /*                                                  +#+  +#+   +#+     +#+ +#+        +#+        +#+     +#+            */
 /*   Created: 2024/03/23 01:46:26 by yus-sato      #+#   #+#  #+#     #+# #+#        #+#        #+#     #+#             */
-/*   Updated: 2024/03/23 01:50:21 by yus-sato     ###    ### ###     ### ########## ###        ###     ##########.ro    */
+/*   Updated: 2024/03/29 23:54:28 by yus-sato     ###    ### ###     ### ########## ###        ###     ##########.ro    */
 /*                                                                                                                      */
 /* ******************************************************************************************************************** */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -22,7 +22,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Session = void 0;
 const keyv_1 = __importDefault(require("keyv"));
@@ -39,7 +38,6 @@ function keyvStoreResolver(url) {
 }
 class Session {
     constructor(req, res) {
-        this.req = req;
         this.res = res;
         this.sessid = req.cookies["sessid"] ? req.cookies["sessid"] : "";
     }
@@ -49,36 +47,35 @@ class Session {
     }
     getId() {
         return __awaiter(this, void 0, void 0, function* () {
-            const sessId = this.sessid ? this.sessid : crypto.randomUUID();
-            if (!this.req.cookies["sessid"])
-                this.setId(sessId);
-            this.sessid = sessId;
-            return sessId;
+            if (!this.sessid)
+                this.sessid = crypto.randomUUID();
+            return this.sessid;
         });
     }
     regenerateId() {
         return __awaiter(this, void 0, void 0, function* () {
-            const preSessionId = yield this.getId();
-            const sessionId = crypto.randomUUID();
-            const value = yield _a.keyv.get(preSessionId);
-            this.setId(sessionId);
-            _a.keyv.set(sessionId, value ? value : {});
-            _a.keyv.delete(preSessionId);
+            const value = yield Session.keyv.get(this.sessid);
+            Session.keyv.delete(this.sessid);
+            this.sessid = crypto.randomUUID();
+            this.setId(this.sessid);
+            Session.keyv.set(this.sessid, value ? value : {}, 7 * 24 * 60 * 60 * 1000);
+            return this.sessid;
         });
     }
     destroy() {
         return __awaiter(this, void 0, void 0, function* () {
-            const preSessionId = yield this.getId();
-            const sessionId = crypto.randomUUID();
-            this.setId(sessionId);
-            _a.keyv.set(sessionId, {});
-            _a.keyv.delete(preSessionId);
+            if (this.sessid) {
+                Session.keyv.delete(this.sessid);
+                this.sessid = "";
+            }
+            this.sessid = crypto.randomUUID();
+            this.setId(this.sessid);
         });
     }
     get() {
         return __awaiter(this, arguments, void 0, function* (key = "") {
             const sessionId = yield this.getId();
-            let value = yield _a.keyv.get(sessionId);
+            let value = yield Session.keyv.get(sessionId);
             if (key.length)
                 return value ? value[key] : null;
             else
@@ -88,14 +85,13 @@ class Session {
     set(key, value) {
         return __awaiter(this, void 0, void 0, function* () {
             const sessionId = yield this.getId();
-            let obj = yield _a.keyv.get(sessionId);
+            let obj = yield Session.keyv.get(sessionId);
             obj = Object.assign(obj ? obj : {}, { [key]: value });
-            return yield _a.keyv.set(sessionId, obj);
+            return yield Session.keyv.set(sessionId, obj, 7 * 24 * 60 * 60);
         });
     }
 }
 exports.Session = Session;
-_a = Session;
 /* prettier-ignore */ Session.DB_URL = process.env.SESSION_DB_URL;
-/* prettier-ignore */ Session.keyv = new keyv_1.default({ store: keyvStoreResolver(_a.DB_URL) });
+/* prettier-ignore */ Session.keyv = new keyv_1.default({ store: keyvStoreResolver(Session.DB_URL) });
 //# sourceMappingURL=session.js.map
