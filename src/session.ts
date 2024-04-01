@@ -43,7 +43,7 @@ export class Session {
     res: ServerResponse<IncomingMessage>
   ) {
     this.res = res;
-    this.sessid = req.cookies["sessid"] ? req.cookies["sessid"] : "";
+    this.sessid = req.cookies["sessid"] ? req.cookies["sessid"] : crypto.randomUUID();
   }
 
   setId(sessionId: string): void {
@@ -52,7 +52,10 @@ export class Session {
   }
 
   public async getId(): Promise<SessionId> {
-    if (!this.sessid) this.sessid = crypto.randomUUID();
+    if (!this.sessid) {
+      this.sessid = crypto.randomUUID();
+      this.setId(this.sessid);
+    }
     return this.sessid;
   }
 
