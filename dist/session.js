@@ -39,7 +39,7 @@ function keyvStoreResolver(url) {
 class Session {
     constructor(req, res) {
         this.res = res;
-        this.sessid = req.cookies["sessid"] ? req.cookies["sessid"] : "";
+        this.sessid = req.cookies["sessid"] ? req.cookies["sessid"] : crypto.randomUUID();
     }
     setId(sessionId) {
         const cookiev = `sessid=${sessionId}; Max-Age=${7 * 24 * 60 * 60}; Path=/`;
@@ -47,8 +47,10 @@ class Session {
     }
     getId() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.sessid)
+            if (!this.sessid) {
                 this.sessid = crypto.randomUUID();
+                this.setId(this.sessid);
+            }
             return this.sessid;
         });
     }
